@@ -8,10 +8,11 @@ ENV PYTHONUNBUFFERED=1
 # Establecer el directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias del sistema necesarias para psycopg2 (PostgreSQL)
+# Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar el archivo de requerimientos e instalar dependencias de Python
