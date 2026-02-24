@@ -46,14 +46,17 @@ def ver(doc_id):
     doc = db.session.get(Documento, doc_id)
     aws_profile = os.environ.get('AWS_PROFILE_NAME', 'TU_PERFIL_AWS')
     s3_bucket = os.environ.get('AWS_S3_BUCKET', 'app-insurance-buck')
-    
-    # Intenta usar el perfil, si está vacío o no configurado usa las credenciales por defecto de AWS
-    if aws_profile and aws_profile != 'TU_PERFIL_AWS':
-        session = boto3.Session(profile_name=aws_profile)
-    else:
-        session = boto3.Session()
-        
-    s3 = session.client('s3')
+
+    # Intenta usar el perfil, si falla o no está configurado usa credenciales por defecto o variables de entorno
+    try:
+        if aws_profile and aws_profile not in ['TU_PERFIL_AWS', '']:
+            session = boto3.Session(profile_name=aws_profile)
+        else:
+            session = boto3.Session()
+        s3 = session.client('s3')
+    except Exception as e:
+        print(f"Error configurando sesión de AWS: {e}")
+        return jsonify({'error': 'Configuración de AWS inválida'}), 500
     
     url = s3.generate_presigned_url('get_object',
         Params={'Bucket': s3_bucket, 'Key': doc.s3_key},
