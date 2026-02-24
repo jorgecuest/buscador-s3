@@ -30,7 +30,7 @@ def populate_from_s3():
             db.create_all() # Garantiza que la tabla exista
             
             # Buscar el registro más reciente insertado en la BD
-            ultimo_doc = Documento.query.order_by(Documento.fecha_agregado.desc()).first()
+            ultimo_doc = db.session.query(Documento).order_by(Documento.fecha_agregado.desc()).first()
             ultima_fecha = ultimo_doc.fecha_agregado.replace(tzinfo=timezone.utc) if ultimo_doc else None
 
             if ultima_fecha:
@@ -65,7 +65,7 @@ def populate_from_s3():
                                 continue # Ignorar archivo porque es muy viejo y ya sabíamos que existe
 
                         # Verificamos si ese S3 Key ya existe (candado final por si subieron archivos al mismo tiempo)
-                        existe = Documento.query.filter_by(s3_key=s3_key).first()
+                        existe = db.session.query(Documento).filter_by(s3_key=s3_key).first()
                         if not existe:
                             nuevo_doc = Documento(nombre=nombre, s3_key=s3_key)
                             db.session.add(nuevo_doc)
