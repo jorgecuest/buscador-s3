@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Buscador de Archivos en S3 Insurance</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 40px;
+        background: #f4f4f9;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .archivo {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .archivo:hover {
+        background: #f9f9f9;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Buscador de Documentos</h1>
+      <input
+        type="text"
+        id="buscador"
+        placeholder="Escribe el nombre del archivo o ID de cliente..."
+      />
+      <div id="resultados"></div>
+    </div>
+
+    <script>
+      const input = document.getElementById("buscador");
+      const lista = document.getElementById("resultados");
+
+      input.addEventListener("input", (e) => {
+        const query = e.target.value;
+        if (query.length < 3) {
+          lista.innerHTML = "";
+          return;
+        }
+
+        fetch(`/api/buscar?q=${query}`)
+          .then((res) => res.json())
+          .then((data) => {
+            lista.innerHTML = "";
+            data.forEach((doc) => {
+              const div = document.createElement("div");
+              div.className = "archivo";
+              div.innerHTML = `
+                            <span>${doc.nombre}</span>
+                            <button onclick="verArchivo(${doc.id})">Ver Archivo</button>
+                        `;
+              lista.appendChild(div);
+            });
+          });
+      });
+
+      function verArchivo(id) {
+        fetch(`/api/ver/${id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            window.open(data.url, "_blank");
+          });
+      }
+    </script>
+  </body>
+</html>
