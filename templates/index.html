@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <title>Buscador de Archivos en S3 Insurance</title>
+    <!-- Estilos CSS para el buscador -->
     <style>
       body {
         font-family: sans-serif;
         margin: 40px;
         background: #f4f4f9;
       }
+      /* Contenedor principal centrado */
       .container {
         max-width: 800px;
         margin: auto;
@@ -17,6 +19,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
+      /* Caja de texto de búsqueda */
       input {
         width: 100%;
         padding: 12px;
@@ -25,6 +28,7 @@
         border-radius: 4px;
         box-sizing: border-box;
       }
+      /* Fila individual para cada archivo encontrado */
       .archivo {
         padding: 10px;
         border-bottom: 1px solid #eee;
@@ -35,6 +39,7 @@
       .archivo:hover {
         background: #f9f9f9;
       }
+      /* Botón de acción para ver el archivo */
       button {
         background: #007bff;
         color: white;
@@ -48,11 +53,13 @@
   <body>
     <div class="container">
       <h1>Buscador de Documentos</h1>
+      <!-- Input de búsqueda en tiempo real -->
       <input
         type="text"
         id="buscador"
         placeholder="Escribe el nombre del archivo o ID de cliente..."
       />
+      <!-- Div donde se renderizarán los resultados de la API -->
       <div id="resultados"></div>
     </div>
 
@@ -60,18 +67,23 @@
       const input = document.getElementById("buscador");
       const lista = document.getElementById("resultados");
 
+      // Evento que se dispara cada vez que el usuario escribe algo
       input.addEventListener("input", (e) => {
         const query = e.target.value;
+
+        // No realizar búsqueda si el texto es muy corto (ahorro de recursos)
         if (query.length < 3) {
           lista.innerHTML = "";
           return;
         }
 
+        // Llamada a nuestra API de búsqueda en PostgreSQL
         fetch(`/api/buscar?q=${query}`)
           .then((res) => res.json())
           .then((data) => {
-            lista.innerHTML = "";
+            lista.innerHTML = ""; // Limpiar resultados anteriores
             data.forEach((doc) => {
+              // Crear dinámicamente el HTML para cada resultado
               const div = document.createElement("div");
               div.className = "archivo";
               div.innerHTML = `
@@ -83,10 +95,15 @@
           });
       });
 
+      /**
+       * Función para obtener la URL firmada de S3 y abrir el archivo.
+       * @param {number} id - El ID del documento en la base de datos.
+       */
       function verArchivo(id) {
         fetch(`/api/ver/${id}`)
           .then((res) => res.json())
           .then((data) => {
+            // Abre la URL temporal generada por Boto3 en una pestaña nueva
             window.open(data.url, "_blank");
           });
       }
